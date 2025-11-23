@@ -1,12 +1,12 @@
 <?php
 /**
- * Plugin Name: Яндекс XML Экспорт
+ * Plugin Name: XML-page generator for Yandex Market format YML
  * Plugin URI: https://github.com/vkopaev/wp-yandex-market-xml
  * Description: Плагин для экспорта товаров в формате XML для Яндекс.Маркета
  * Version: 1.0.0
  * Author: vkopaev
  * License: GPL v2 or later
- * Text Domain: yandex-xml-export
+ * Text Domain: xml-page-generator-for-yandex-market-format-yml
  */
 
 // Запрет прямого доступа
