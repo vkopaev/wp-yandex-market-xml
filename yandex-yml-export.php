@@ -235,6 +235,34 @@ class YandexXMLExport {
         return htmlspecialchars($string, ENT_XML1, 'UTF-8');
     }
     
+    // Функции санитизации для настроек
+    public function sanitize_post_type($input) {
+        $post_types = get_post_types(array('public' => true));
+        return in_array($input, $post_types) ? $input : 'product';
+    }
+    
+    public function sanitize_taxonomy($input) {
+        $taxonomies = get_taxonomies(array('public' => true));
+        return in_array($input, $taxonomies) ? $input : 'category';
+    }
+    
+    public function sanitize_text($input) {
+        return sanitize_text_field($input);
+    }
+    
+    public function sanitize_number($input) {
+        return absint($input);
+    }
+    
+    public function sanitize_currency($input) {
+        $allowed_currencies = array('RUR', 'RUB', 'USD', 'EUR');
+        return in_array($input, $allowed_currencies) ? $input : 'RUR';
+    }
+    
+    public function sanitize_checkbox($input) {
+        return $input ? '1' : '0';
+    }
+    
     // Получаем все таксономии для выбранного типа записей
     private function get_taxonomies_for_post_type($post_type) {
         $taxonomies = get_object_taxonomies($post_type, 'objects');
@@ -260,15 +288,77 @@ class YandexXMLExport {
     }
     
     public function register_settings() {
-        register_setting('yandex_xml_settings', 'yandex_xml_post_type');
-        register_setting('yandex_xml_settings', 'yandex_xml_taxonomy');
-        register_setting('yandex_xml_settings', 'yandex_xml_shop_name');
-        register_setting('yandex_xml_settings', 'yandex_xml_company');
-        register_setting('yandex_xml_settings', 'yandex_xml_platform');
-        register_setting('yandex_xml_settings', 'yandex_xml_delivery_cost');
-        register_setting('yandex_xml_settings', 'yandex_xml_delivery_days');
-        register_setting('yandex_xml_settings', 'yandex_xml_currency');
-        register_setting('yandex_xml_settings', 'yandex_xml_enable_delivery');
+        register_setting(
+            'yandex_xml_settings', 
+            'yandex_xml_post_type', 
+            array(
+                'sanitize_callback' => array($this, 'sanitize_post_type')
+            )
+        );
+        
+        register_setting(
+            'yandex_xml_settings', 
+            'yandex_xml_taxonomy', 
+            array(
+                'sanitize_callback' => array($this, 'sanitize_taxonomy')
+            )
+        );
+        
+        register_setting(
+            'yandex_xml_settings', 
+            'yandex_xml_shop_name', 
+            array(
+                'sanitize_callback' => array($this, 'sanitize_text')
+            )
+        );
+        
+        register_setting(
+            'yandex_xml_settings', 
+            'yandex_xml_company', 
+            array(
+                'sanitize_callback' => array($this, 'sanitize_text')
+            )
+        );
+        
+        register_setting(
+            'yandex_xml_settings', 
+            'yandex_xml_platform', 
+            array(
+                'sanitize_callback' => array($this, 'sanitize_text')
+            )
+        );
+        
+        register_setting(
+            'yandex_xml_settings', 
+            'yandex_xml_delivery_cost', 
+            array(
+                'sanitize_callback' => array($this, 'sanitize_number')
+            )
+        );
+        
+        register_setting(
+            'yandex_xml_settings', 
+            'yandex_xml_delivery_days', 
+            array(
+                'sanitize_callback' => array($this, 'sanitize_number')
+            )
+        );
+        
+        register_setting(
+            'yandex_xml_settings', 
+            'yandex_xml_currency', 
+            array(
+                'sanitize_callback' => array($this, 'sanitize_currency')
+            )
+        );
+        
+        register_setting(
+            'yandex_xml_settings', 
+            'yandex_xml_enable_delivery', 
+            array(
+                'sanitize_callback' => array($this, 'sanitize_checkbox')
+            )
+        );
     }
     
     public function settings_page() {
@@ -368,7 +458,7 @@ class YandexXMLExport {
                     <tr class="delivery-settings">
                         <th scope="row">Стоимость доставки</th>
                         <td>
-                            <input type="number" name="yandex_xml_delivery_cost" value="<?php echo esc_attr(get_option('yandex_xml_delivery_cost', '200')); ?>" class="small-text" />
+                            <input type="number" name="yandex_xml_delivery_cost" value="<?php echo esc_attr(get_option('yandex_xml_delivery_cost', '200')); ?>" class="small-text" min="0" step="1" />
                             <p class="description">Стоимость доставки в рублях</p>
                         </td>
                     </tr>
@@ -376,7 +466,7 @@ class YandexXMLExport {
                     <tr class="delivery-settings">
                         <th scope="row">Срок доставки (дни)</th>
                         <td>
-                            <input type="number" name="yandex_xml_delivery_days" value="<?php echo esc_attr(get_option('yandex_xml_delivery_days', '1')); ?>" class="small-text" />
+                            <input type="number" name="yandex_xml_delivery_days" value="<?php echo esc_attr(get_option('yandex_xml_delivery_days', '1')); ?>" class="small-text" min="1" step="1" />
                             <p class="description">Срок доставки в рабочих днях</p>
                         </td>
                     </tr>
